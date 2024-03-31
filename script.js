@@ -4,20 +4,33 @@ $(".menu-mob").on("click", () => {
 
 const getLink = async () => {
     const inputData = $("#input-shorten");
-    const getlink = await fetch(`https://api.shrtco.de/v2/shorten?url=${inputData.val()}`);
-    const newlink = await getlink.json();
 
-    $(".container-retorno-api").html(
-        `
-            <div class="container-link-novo">
-                <p class="link-inserido">${inputData.val().slice(0, 31)}...</p>
-                <div class="container2">
-                    <p class="link-novo">${newlink.result.short_link}</p>
-                    <button type="button" class="btn-copiar-link" onClick="copiar()">Copy</button>
+    try {
+
+        const getlink = await fetch('https://is.gd/create.php?format=json&url=${inputData.val()}');
+        
+        const newlink = await getlink.json();
+
+        if(newlink.errormessage.length > 0) {
+            return $('.erro').append(newlink.errormessage)
+        }
+        
+        $(".container-retorno-api").append(
+            `
+                <div class="container-link-novo">
+                    <p class="link-inserido">${inputData.val().slice(0, 31)}...</p>
+                    <div class="container2">
+                        <p class="link-novo">${newlink.shorturl}</p>
+                        <button type="button" class="btn-copiar-link" onClick="copiar()">Copy</button>
+                    </div>
                 </div>
-            </div>
-        `
-    );
+            `
+        );
+
+    } catch (error) {
+        $('.erro').append(error)
+    }
+
 
     inputData.val("");
     

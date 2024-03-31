@@ -376,7 +376,7 @@ body {
 
 /* Boost your link --- obs: NÃO ESTÁ SENDO ESTILIZADO */
 .boost {
-    width: 100vw;
+    width: 100%;
     height: 250px;
     background-size: 100%;
     background-repeat: no-repeat;
