@@ -3,64 +3,74 @@ $(".menu-mob").on("click", () => {
 });
 
 const getLink = async () => {
-    const inputData = $("#input-shorten");
-
+    const inputUrl = $("#input-shorten");
+    const url = inputUrl.val().trim()
     try {
 
-        const getlink = await fetch('https://is.gd/create.php?format=json&url=${inputData.val()}');
+        const getlink = await fetch(`https://tinyurl.com/api-create.php?url=${url}`, {
+            method: 'GET',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+        });
         
-        const newlink = await getlink.json();
-
-        if(newlink.errormessage.length > 0) {
-            return $('.erro').append(newlink.errormessage)
+        const newlink = await getlink.text();
+        
+        if (!newlink.length || newlink == 'Error') {
+            return $('.erro').html('Failed to generate link')
         }
-        
+
         $(".container-retorno-api").append(
             `
                 <div class="container-link-novo">
-                    <p class="link-inserido">${inputData.val().slice(0, 31)}...</p>
+                    <p class="link-inserido">${url.length > 32 ? url.slice(0, 31) + '...' : url.slice(0, 31)}</p>
                     <div class="container2">
-                        <p class="link-novo">${newlink.shorturl}</p>
-                        <button type="button" class="btn-copiar-link" onClick="copiar()">Copy</button>
+                        <p class="link-novo">${newlink}</p>
+                        <button type="button" class="btn-copiar-link">Copy</button>
                     </div>
                 </div>
             `
         );
 
+        if($('.container-link-novo').length > 0) {
+            copiar()
+        }
+
     } catch (error) {
-        $('.erro').append(error)
+        $('.erro').html('Failed to generate link')
     }
 
-
-    inputData.val("");
-    
+    inputUrl.val("");
 }
 
-
 const copiar = () => {
-    navigator.clipboard.writeText($(".link-novo").html());
+    $('.btn-copiar-link').on('click', function () {
 
-    $(".btn-copiar-link").addClass("copiado");
-    $(".btn-copiar-link").html("Copied!");
-
-    setInterval(() => {
-        $(".btn-copiar-link").removeClass("copiado");
-        $(".btn-copiar-link").html("Copy");
-    }, 3000);
+        navigator.clipboard.writeText($(this).prev('.link-novo').text());
+        
+        $(this).addClass("copiado");
+        $(this).html("Copied!");
+    
+        setInterval(() => {
+            $(this).removeClass("copiado");
+            $(this).html("Copy");
+        }, 3000);
+    
+    })
 };
 
 const validarForm = () => {
     const inputData = $("#input-shorten").val();
 
-    if(inputData == '' || inputData.length < '10') {
+    if (inputData == '' || inputData.length < '10') {
         $(".erro").html("Please add a link");
-        $("#input-shorten").css({"border-color":"hsl(0, 87%, 67%)"});
+        $("#input-shorten").css({ "border-color": "hsl(0, 87%, 67%)" });
 
         setInterval(() => {
             $(".erro").html("");
-            $("#input-shorten").css({"border-color":"transparent"});
+            $("#input-shorten").css({ "border-color": "transparent" });
         }, 6000);
-        
+
         return false;
     }
 
@@ -68,7 +78,7 @@ const validarForm = () => {
 }
 
 $("#btn-shorten").on("click", () => {
-    if(validarForm()) {
+    if (validarForm()) {
         getLink();
     }
 });
